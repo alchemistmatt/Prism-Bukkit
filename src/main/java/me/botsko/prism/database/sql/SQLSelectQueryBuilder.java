@@ -28,8 +28,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
 
@@ -149,8 +153,8 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
     protected void worldCondition() {
         if (parameters.getWorld() != null) {
             addCondition(
-                    String.format("world_id = ( SELECT w.world_id FROM " + prefix + "worlds w WHERE w.world = '%s')",
-                            parameters.getWorld()));
+                  String.format("world_id = ( SELECT w.world_id FROM " + prefix + "worlds w WHERE w.world = '%s')",
+                        parameters.getWorld()));
         }
     }
 
@@ -163,7 +167,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
         boolean containsPrismProcessType = false;
 
         // Build IDs for prism process actions
-        final ArrayList<String> prismActionIds = new ArrayList<>();
+        final List<String> prismActionIds = new ArrayList<>();
         for (final Entry<String, Integer> entry : Prism.prismActions.entrySet()) {
             if (entry.getKey().contains("prism")) {
                 containsPrismProcessType = true;
@@ -174,8 +178,8 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
         // scan whitelist of given actions
         if (action_types.size() > 0) {
 
-            final ArrayList<String> includeIds = new ArrayList<>();
-            final ArrayList<String> excludeIds = new ArrayList<>();
+            final List<String> includeIds = new ArrayList<>();
+            final List<String> excludeIds = new ArrayList<>();
             for (final Entry<String, MatchRule> entry : action_types.entrySet()) {
                 if (entry.getValue().equals(MatchRule.INCLUDE)) {
                     includeIds.add("" + Prism.prismActions.get(entry.getKey()));
@@ -204,7 +208,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
      *
      */
     protected void playerCondition() {
-        final HashMap<String, MatchRule> playerNames = parameters.getPlayerNames();
+        final Map<String, MatchRule> playerNames = parameters.getPlayerNames();
         if (playerNames.size() > 0) {
 
             // Match the first rule, this needs to change, we can't include and
@@ -223,7 +227,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
             }
             // Add conditions
             addCondition(tableNameData + ".player_id " + matchQuery + " ( SELECT p.player_id FROM " + prefix
-                    + "players p WHERE " + buildMultipleConditions(playerNames, "p.player", null) + ")");
+                  + "players p WHERE " + buildMultipleConditions(playerNames, "p.player", null) + ")");
         }
     }
 
@@ -269,7 +273,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
 
                 for (IntPair pair : pairs) {
                     blockArr.add(tableNameData + ".block_id = " + pair.first + " AND " + tableNameData
-                            + ".block_subid = " + pair.second);
+                          + ".block_subid = " + pair.second);
                 }
             }
             addCondition(buildGroupConditions(null, blockArr.toArray(new String[0]), "%s%s", "OR", null));
@@ -281,7 +285,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
      */
     protected void entityCondition() {
         // Entity
-        final HashMap<String, MatchRule> entityNames = parameters.getEntities();
+        final Map<String, MatchRule> entityNames = parameters.getEntities();
         if (entityNames.size() > 0) {
             addCondition(buildMultipleConditions(entityNames, "ex.data", "entity_name\":\"%s"));
         }
@@ -318,7 +322,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
      */
     protected void coordinateCondition() {
         // Specific coords
-        final ArrayList<Location> locations = parameters.getSpecificBlockLocations();
+        final List<Location> locations = parameters.getSpecificBlockLocations();
         if (locations.size() > 0) {
             StringBuilder coordCond = new StringBuilder("(");
             int l = 0;
@@ -368,7 +372,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
     protected String group() {
         if (shouldGroup) {
             return " GROUP BY " + tableNameData + ".action_id, " + tableNameData + ".player_id, " + tableNameData
-                    + ".block_id, ex.data, DATE(FROM_UNIXTIME(" + tableNameData + ".epoch))";
+                  + ".block_id, ex.data, DATE(FROM_UNIXTIME(" + tableNameData + ".epoch))";
         }
         return "";
     }
@@ -408,7 +412,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
      * @param field_name
      * @return
      */
-    protected String buildMultipleConditions(HashMap<String, MatchRule> origValues, String field_name, String format) {
+    protected String buildMultipleConditions(Map<String, MatchRule> origValues, String field_name, String format) {
         String query = "";
         if (!origValues.isEmpty()) {
 
@@ -521,9 +525,9 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
         eventTimer.recordTimedEvent("query started");
 
         try (
-                Connection conn = Prism.getPrismDataSource().getDataSource().getConnection();
-                PreparedStatement s = conn.prepareStatement(query);
-                ResultSet rs = s.executeQuery()
+              Connection conn = Prism.getPrismDataSource().getDataSource().getConnection();
+              PreparedStatement s = conn.prepareStatement(query);
+              ResultSet rs = s.executeQuery()
         ) {
             RecordingManager.failedDbConnectionCount = 0;
             eventTimer.recordTimedEvent("query returned, building results");
@@ -664,13 +668,13 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
 
                             if (blockId > 0) {
                                 Prism.warn("Unable to convert record #" + rowId + " to material: " +
-                                        "block_id=" + blockId + ", block_subid=" + blockSubId + itemMetadataDesc);
+                                      "block_id=" + blockId + ", block_subid=" + blockSubId + itemMetadataDesc);
                             } else if (oldBlockId > 0) {
                                 Prism.warn("Unable to convert record #" + rowId + " to material: " +
-                                        "old_block_id=" + oldBlockId + ", old_block_subid=" + oldBlockSubId + itemMetadataDesc);
+                                      "old_block_id=" + oldBlockId + ", old_block_subid=" + oldBlockSubId + itemMetadataDesc);
                             } else {
                                 Prism.warn("Unable to convert record #" + rowId + " to material: " +
-                                        "block_id=0, old_block_id=0" + itemMetadataDesc);
+                                      "block_id=0, old_block_id=0" + itemMetadataDesc);
                             }
                         }
                     }
@@ -685,7 +689,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
                     try {
                         // Calls UUID.fromString, must handle potential exceptions
                         OfflinePlayer offline = Bukkit.getOfflinePlayer(
-                                PlayerIdentification.uuidFromDbString(rs.getString(14)));
+                              PlayerIdentification.uuidFromDbString(rs.getString(14)));
 
                         // Fake player
                         if (offline.hasPlayedBefore()) {
@@ -712,7 +716,7 @@ public class SQLSelectQueryBuilder extends QueryBuilder implements SelectQuery {
         } catch (NullPointerException e) {
             if (RecordingManager.failedDbConnectionCount == 0) {
                 Prism.log(
-                        "Prism database error. Connection should be there but it's not. Leaving actions to log in queue.");
+                      "Prism database error. Connection should be there but it's not. Leaving actions to log in queue.");
             }
             RecordingManager.failedDbConnectionCount++;
 

@@ -19,6 +19,13 @@ public class SQLPrismDataSourceUpdater implements PrismDataSourceUpdater {
         this.dataSource = dataSource;
     }
 
+    private static void v7_batch_material(PreparedStatement st, String before, String after) throws SQLException {
+        // this "backwards" insert matches the order in the prepared statement
+        st.setString(1, after);
+        st.setString(2, before);
+        st.addBatch();
+    }
+
     public void v1_to_v2() {
     }
 
@@ -35,8 +42,7 @@ public class SQLPrismDataSourceUpdater implements PrismDataSourceUpdater {
         String prefix = dataSource.getPrefix();
         String query;
         try (Connection conn = dataSource.getConnection();
-             Statement st = conn.createStatement())
-        {
+             Statement st = conn.createStatement()) {
 
             // Key must be dropped before we can edit colum types
             query = "ALTER TABLE `" + prefix + "data_extra` DROP FOREIGN KEY `" + prefix + "data_extra_ibfk_1`;";
@@ -46,25 +52,19 @@ public class SQLPrismDataSourceUpdater implements PrismDataSourceUpdater {
             st.executeUpdate(query);
 
             query = "ALTER TABLE " + prefix
-                    + "data_extra MODIFY extra_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, MODIFY data_id bigint(20) unsigned NOT NULL";
+                  + "data_extra MODIFY extra_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, MODIFY data_id bigint(20) unsigned NOT NULL";
             st.executeUpdate(query);
 
             // return foreign key
             /// BEGIN COPY PASTE Prism.setupDatabase()
             query = "ALTER TABLE `" + prefix + "data_extra` ADD CONSTRAINT `" + prefix
-                    + "data_extra_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `" + prefix
-                    + "data` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;";
+                  + "data_extra_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `" + prefix
+                  + "data` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;";
             st.executeUpdate(query);
             /// END COPY PASTE
         } catch (SQLException e) {
             dataSource.handleDataSourceException(e);
         }
-    }
-    private static void v7_batch_material(PreparedStatement st, String before, String after) throws SQLException {
-        // this "backwards" insert matches the order in the prepared statement
-        st.setString(1, after);
-        st.setString(2, before);
-        st.addBatch();
     }
 
     @Override
@@ -72,9 +72,9 @@ public class SQLPrismDataSourceUpdater implements PrismDataSourceUpdater {
 
         String prefix = dataSource.getPrefix();
         String query = "UPDATE `" + prefix + "id_map` SET material = ? WHERE material = ?";
-        try(
-                Connection conn = dataSource.getConnection();
-                PreparedStatement st = conn.prepareStatement(query)
+        try (
+              Connection conn = dataSource.getConnection();
+              PreparedStatement st = conn.prepareStatement(query)
         ) {
             v7_batch_material(st, "CACTUS_GREEN", "GREEN_DYE");
             v7_batch_material(st, "DANDELION_YELLOW", "YELLOW_DYE");
@@ -82,8 +82,7 @@ public class SQLPrismDataSourceUpdater implements PrismDataSourceUpdater {
             v7_batch_material(st, "SIGN", "OAK_SIGN");
             v7_batch_material(st, "WALL_SIGN", "OAK_WALL_SIGN");
             st.executeBatch();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             dataSource.handleDataSourceException(e);
         }
     }

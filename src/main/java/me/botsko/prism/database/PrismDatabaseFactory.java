@@ -16,7 +16,7 @@ public class PrismDatabaseFactory {
 
     private static PrismDataSource database = null;
 
-    public static void createDefaultConfig(Configuration configuration) {
+    public static void createDefaultConfig(ConfigurationSection configuration) {
         ConfigurationSection mysql;
         if (configuration.contains("prism.mysql")) {
             mysql = configuration.getConfigurationSection("prism.mysql");
@@ -36,10 +36,11 @@ public class PrismDatabaseFactory {
         // queue
         section.addDefault("database.force-write-queue-on-shutdown", true);
     }
-    public static PrismDataSource createDataSource(Configuration  configuration) {
-        if(configuration == null) return null;
-        String dataSource = configuration.getString("datasource","mysql");
-        if(dataSource == null)return null;
+
+    public static PrismDataSource createDataSource(ConfigurationSection configuration) {
+        if (configuration == null) return null;
+        String dataSource = configuration.getString("datasource", "mysql");
+        if (dataSource == null) return null;
         switch (dataSource) {
             case "mysql":
                 Prism.log("Attempting to configure datasource as " + dataSource);
@@ -58,10 +59,11 @@ public class PrismDatabaseFactory {
         }
 
     }
-    public static PrismDataSourceUpdater createUpdater(Configuration configuration){
-        if(configuration == null) return null;
-        String dataSource = configuration.getString("datasource","mysql");
-        if(dataSource == null)return null;
+
+    public static PrismDataSourceUpdater createUpdater(ConfigurationSection configuration) {
+        if (configuration == null) return null;
+        String dataSource = configuration.getString("datasource", "mysql");
+        if (dataSource == null) return null;
         switch (dataSource) {
             case "mysql":
             case "derby":

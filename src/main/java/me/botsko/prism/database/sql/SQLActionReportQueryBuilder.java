@@ -1,11 +1,5 @@
 package me.botsko.prism.database.sql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import me.botsko.prism.Prism;
 import me.botsko.prism.actionlibs.QueryParameters;
 import me.botsko.prism.database.ActionReportQuery;
@@ -13,6 +7,12 @@ import me.botsko.prism.database.PrismDataSource;
 import me.botsko.prism.utils.TypeUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class SQLActionReportQueryBuilder extends SQLSelectQueryBuilder implements ActionReportQuery {
 
@@ -54,8 +54,8 @@ public class SQLActionReportQueryBuilder extends SQLSelectQueryBuilder implement
     @Override
     public String select() {
         final String sql = "SELECT COUNT(*), a.action " + "FROM " + prefix + "data " + "INNER JOIN " + prefix
-                + "actions a ON a.action_id = " + prefix + "data.action_id " + where() + " " + "GROUP BY a.action_id "
-                + "ORDER BY COUNT(*) DESC";
+              + "actions a ON a.action_id = " + prefix + "data.action_id " + where() + " " + "GROUP BY a.action_id "
+              + "ORDER BY COUNT(*) DESC";
 
         return sql;
 
@@ -72,15 +72,15 @@ public class SQLActionReportQueryBuilder extends SQLSelectQueryBuilder implement
         final int colTextLen = 16;
         final int colIntLen = 12;
         sender.sendMessage(Prism.messenger.playerSubduedHeaderMsg(
-                "Crafting action type report for " + ChatColor.DARK_AQUA + playerName + "..."));
+              "Crafting action type report for " + ChatColor.DARK_AQUA + playerName + "..."));
         try (
-                Connection conn = dataSource.getConnection();
-                PreparedStatement s = conn.prepareStatement(getQuery(parameters, shouldGroup));
-                ResultSet rs = s.executeQuery()
+              Connection conn = dataSource.getConnection();
+              PreparedStatement s = conn.prepareStatement(getQuery(parameters, shouldGroup));
+              ResultSet rs = s.executeQuery()
         ) {
             sender.sendMessage(
-                    Prism.messenger.playerMsg(ChatColor.GRAY + TypeUtils.padStringRight("Action", colTextLen)
-                            + TypeUtils.padStringRight("Count", colIntLen)));
+                  Prism.messenger.playerMsg(ChatColor.GRAY + TypeUtils.padStringRight("Action", colTextLen)
+                        + TypeUtils.padStringRight("Count", colIntLen)));
             while (rs.next()) {
                 final String action = rs.getString(2);
                 final int count = rs.getInt(1);
@@ -88,7 +88,7 @@ public class SQLActionReportQueryBuilder extends SQLSelectQueryBuilder implement
                 final String colAlias = TypeUtils.padStringRight(action, colTextLen);
                 final String colPlaced = TypeUtils.padStringRight("" + count, colIntLen);
                 sender.sendMessage(Prism.messenger
-                        .playerMsg(ChatColor.DARK_AQUA + colAlias + ChatColor.GREEN + colPlaced));
+                      .playerMsg(ChatColor.DARK_AQUA + colAlias + ChatColor.GREEN + colPlaced));
 
             }
         } catch (final SQLException e) {

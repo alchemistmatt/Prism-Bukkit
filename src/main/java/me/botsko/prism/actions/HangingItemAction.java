@@ -4,136 +4,132 @@ import me.botsko.prism.actionlibs.QueryParameters;
 import me.botsko.prism.appliers.ChangeResult;
 import me.botsko.prism.appliers.ChangeResultType;
 import me.botsko.prism.utils.BlockUtils;
-
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Player;
 
 public class HangingItemAction extends GenericAction {
 
-	public class HangingItemActionData {
-		public String type;
-		public String direction;
-	}
+    /**
+     *
+     */
+    protected HangingItemActionData actionData;
 
-	/**
-	 * 
-	 */
-	protected HangingItemActionData actionData;
+    /**
+     * @param hanging
+     */
+    public void setHanging(Hanging hanging) {
 
-	/**
-	 * 
-	 * @param hanging
-	 */
-	public void setHanging(Hanging hanging) {
+        actionData = new HangingItemActionData();
 
-		actionData = new HangingItemActionData();
+        if (hanging != null) {
+            this.actionData.type = hanging.getType().name().toLowerCase();
+            if (hanging.getAttachedFace() != null) {
+                this.actionData.direction = hanging.getAttachedFace().name().toLowerCase();
+            }
 
-		if (hanging != null) {
-			this.actionData.type = hanging.getType().name().toLowerCase();
-			if (hanging.getAttachedFace() != null) {
-				this.actionData.direction = hanging.getAttachedFace().name().toLowerCase();
-			}
-			
-			setLoc(hanging.getLocation().getBlock().getLocation());
-		}
-	}
+            setLoc(hanging.getLocation().getBlock().getLocation());
+        }
+    }
 
-	@Override
-	public boolean hasExtraData() {
-		return actionData != null;
-	}
+    @Override
+    public boolean hasExtraData() {
+        return actionData != null;
+    }
 
-	@Override
-	public String serialize() {
-		return gson().toJson(actionData);
-	}
-	
-	@Override
-	public void deserialize(String data) {
-		if (data != null && data.startsWith("{")) {
-			actionData = gson().fromJson(data, HangingItemActionData.class);
-		}
-	}
+    @Override
+    public String serialize() {
+        return gson().toJson(actionData);
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	public String getHangingType() {
-		return actionData.type;
-	}
+    @Override
+    public void deserialize(String data) {
+        if (data != null && data.startsWith("{")) {
+            actionData = gson().fromJson(data, HangingItemActionData.class);
+        }
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	public BlockFace getDirection() {
-		if (actionData.direction != null) {
-			return BlockFace.valueOf(actionData.direction.toUpperCase());
-		}
-		return null;
-	}
+    /**
+     * @return
+     */
+    public String getHangingType() {
+        return actionData.type;
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	@Override
-	public String getNiceName() {
-		return this.actionData.type != null ? this.actionData.type : "unknown";
-	}
+    /**
+     * @return
+     */
+    public BlockFace getDirection() {
+        if (actionData.direction != null) {
+            return BlockFace.valueOf(actionData.direction.toUpperCase());
+        }
+        return null;
+    }
 
-	/**
-	 *
-	 */
-	@Override
-	public ChangeResult applyRollback(Player player, QueryParameters parameters, boolean isPreview) {
-		return hangItem(player, parameters, isPreview);
-	}
+    /**
+     * @return
+     */
+    @Override
+    public String getNiceName() {
+        return this.actionData.type != null ? this.actionData.type : "unknown";
+    }
 
-	/**
-	 *
-	 */
-	@Override
-	public ChangeResult applyRestore(Player player, QueryParameters parameters, boolean isPreview) {
-		return hangItem(player, parameters, isPreview);
-	}
+    /**
+     *
+     */
+    @Override
+    public ChangeResult applyRollback(Player player, QueryParameters parameters, boolean isPreview) {
+        return hangItem(player, parameters, isPreview);
+    }
 
-	/**
-	 * 
-	 */
-	public ChangeResult hangItem(Player player, QueryParameters parameters, boolean is_preview) {
-		
-		if(actionData == null) {
-			return new ChangeResult(ChangeResultType.SKIPPED, null);
-		}
+    /**
+     *
+     */
+    @Override
+    public ChangeResult applyRestore(Player player, QueryParameters parameters, boolean isPreview) {
+        return hangItem(player, parameters, isPreview);
+    }
 
-		final BlockFace attachedFace = getDirection();
+    /**
+     *
+     */
+    public ChangeResult hangItem(Player player, QueryParameters parameters, boolean is_preview) {
 
-		final Location loc = getLoc().getBlock().getRelative(getDirection())
-				.getLocation();
+        if (actionData == null) {
+            return new ChangeResult(ChangeResultType.SKIPPED, null);
+        }
 
-		// Ensure there's a block at this location that accepts an attachment
-		if (BlockUtils.materialMeansBlockDetachment(loc.getBlock().getType())) {
-			return new ChangeResult(ChangeResultType.SKIPPED, null);
-		}
+        final BlockFace attachedFace = getDirection();
 
-		try {
-			if (getHangingType().equals("item_frame")) {
-				final Hanging hangingItem = getWorld().spawn(loc, ItemFrame.class);
-				hangingItem.setFacingDirection(attachedFace, true);
-				return new ChangeResult(ChangeResultType.APPLIED, null);
-			}
-			else if (getHangingType().equals("painting")) {
-				final Hanging hangingItem = getWorld().spawn(loc, Painting.class);
-				hangingItem.setFacingDirection(getDirection(), true);
-				return new ChangeResult(ChangeResultType.APPLIED, null);
-			}
-		}
-		catch (final IllegalArgumentException e) {
-			// Something interfered with being able to place the painting
-		}
-		return new ChangeResult(ChangeResultType.SKIPPED, null);
-	}
+        final Location loc = getLoc().getBlock().getRelative(getDirection())
+              .getLocation();
+
+        // Ensure there's a block at this location that accepts an attachment
+        if (BlockUtils.materialMeansBlockDetachment(loc.getBlock().getType())) {
+            return new ChangeResult(ChangeResultType.SKIPPED, null);
+        }
+
+        try {
+            if (getHangingType().equals("item_frame")) {
+                final Hanging hangingItem = getWorld().spawn(loc, ItemFrame.class);
+                hangingItem.setFacingDirection(attachedFace, true);
+                return new ChangeResult(ChangeResultType.APPLIED, null);
+            } else if (getHangingType().equals("painting")) {
+                final Hanging hangingItem = getWorld().spawn(loc, Painting.class);
+                hangingItem.setFacingDirection(getDirection(), true);
+                return new ChangeResult(ChangeResultType.APPLIED, null);
+            }
+        } catch (final IllegalArgumentException e) {
+            // Something interfered with being able to place the painting
+        }
+        return new ChangeResult(ChangeResultType.SKIPPED, null);
+    }
+
+    public class HangingItemActionData {
+        public String type;
+        public String direction;
+    }
 }

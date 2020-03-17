@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -25,6 +26,7 @@ import org.kitteh.pastegg.Visibility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class MiscUtils {
@@ -39,7 +41,7 @@ public class MiscUtils {
      * @return integer
      */
     public static int clampRadius(Player player, int desiredRadius, PrismProcessType processType,
-                                  FileConfiguration config) {
+                                  ConfigurationSection config) {
 
         if (desiredRadius <= 0) {
             return config.getInt("prism.near.default-radius");
@@ -68,7 +70,7 @@ public class MiscUtils {
             // Otherwise non-player
             return desiredRadius;
         } else if (!processType.equals(PrismProcessType.LOOKUP) && desiredRadius
-                > maxApplierRadius) {
+              > maxApplierRadius) {
             // If player does not have permission to override the max
             if (player != null && !player.hasPermission("prism.override-max-applier-radius")) {
                 return maxApplierRadius;
@@ -119,28 +121,28 @@ public class MiscUtils {
 
         if (!Prism.getInstance().getConfig().getBoolean("prism.paste.enable")) {
             sender.sendMessage(Prism.messenger.playerError(
-                    "Paste.gg support is currently disabled by config."));
+                  "Paste.gg support is currently disabled by config."));
         }
 
         int expire = 60 * 60 * 1000;
         PasteFile file = new PasteFile("Prism Result",
-                new PasteContent(PasteContent.ContentType.TEXT, results));
+              new PasteContent(PasteContent.ContentType.TEXT, results));
 
         final PasteBuilder.PasteResult result
-                = new PasteBuilder().name("Prism Results")
-                .expireIn(expire)
-                .addFile(file)
-                .visibility(Visibility.UNLISTED)
-                .build();
+              = new PasteBuilder().name("Prism Results")
+              .expireIn(expire)
+              .addFile(file)
+              .visibility(Visibility.UNLISTED)
+              .build();
         if (result.getPaste().isPresent()) {
             Paste paste = result.getPaste().get();
             sender.sendMessage(Prism.messenger.playerSuccess("Successfully pasted results: "
-                    + prismWebUrl
-                    + paste.getId()));
+                  + prismWebUrl
+                  + paste.getId()));
         } else {
             sender.sendMessage(Prism.messenger.playerError(
-                    "Unable to paste results (" + ChatColor.YELLOW + result.getMessage()
-                            + ChatColor.RED + ")."));
+                  "Unable to paste results (" + ChatColor.YELLOW + result.getMessage()
+                        + ChatColor.RED + ")."));
 
         }
 
@@ -159,18 +161,18 @@ public class MiscUtils {
         if (isPaper || isSpigot) {
             String[] message = Prism.messenger.playerMsg(a.getMessage());
             //line 1 holds the index so we set that as the highlighted for command click
-            final List<BaseComponent> toSend = new ArrayList<>();
+            final Collection<BaseComponent> toSend = new ArrayList<>();
             int i = 0;
             for (String m : message) {
                 BaseComponent[] text = TextComponent.fromLegacyText(
-                        (player instanceof Player) ? m : m.replace("\n", ""));
+                      (player instanceof Player) ? m : m.replace("\n", ""));
                 if (i == 0) {
                     Arrays.asList(text).forEach(baseComponent -> {
                         baseComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new TextComponent[]{new TextComponent("Click to teleport")}));
+                              new TextComponent[]{new TextComponent("Click to teleport")}));
                         baseComponent.setClickEvent(
-                                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr tp "
-                                        + a.getIndex()));
+                              new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr tp "
+                                    + a.getIndex()));
                         toSend.add(baseComponent);
                     });
                 } else {
@@ -200,22 +202,22 @@ public class MiscUtils {
         if (player instanceof Player) {
             if (PaperLib.isPaper()) {
                 if (results.getPage() == 1) {
-                    if (results.getTotal_pages() > 1) {
+                    if (results.getTotalPages() > 1) {
                         player.sendMessage(MiscUtils.getNextButton());
                     }
-                } else if (results.getPage() < results.getTotal_pages()) {
+                } else if (results.getPage() < results.getTotalPages()) {
                     player.sendMessage(MiscUtils.getPrevNextButtons());
-                } else if (results.getPage() == results.getTotal_pages()) {
+                } else if (results.getPage() == results.getTotalPages()) {
                     player.sendMessage(MiscUtils.getPreviousButton());
                 }
             } else {
                 if (results.getPage() == 1) {
-                    if (results.getTotal_pages() > 1) {
+                    if (results.getTotalPages() > 1) {
                         player.spigot().sendMessage(MiscUtils.getNextButton());
                     }
-                } else if (results.getPage() < results.getTotal_pages()) {
+                } else if (results.getPage() < results.getTotalPages()) {
                     player.spigot().sendMessage(MiscUtils.getPrevNextButtons());
-                } else if (results.getPage() == results.getTotal_pages()) {
+                } else if (results.getPage() == results.getTotalPages()) {
                     player.spigot().sendMessage(MiscUtils.getPreviousButton());
                 }
             }
@@ -261,7 +263,7 @@ public class MiscUtils {
      * @param msg      the message
      * @param commands the commands
      */
-    public static void dispatchAlert(String msg, List<String> commands) {
+    public static void dispatchAlert(String msg, Iterable<String> commands) {
         String colorized = TypeUtils.colorize(msg);
         String stripped = ChatColor.stripColor(colorized);
         for (String command : commands) {
@@ -298,9 +300,9 @@ public class MiscUtils {
         TextComponent textComponent = new TextComponent(" [<< Prev]");
         textComponent.setColor(ChatColor.GRAY);
         textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new TextComponent[]{new TextComponent("Click to view the previous page")}));
+              new TextComponent[]{new TextComponent("Click to view the previous page")}));
         textComponent.setClickEvent(
-                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr pg p"));
+              new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr pg p"));
         return textComponent;
 
     }
@@ -325,9 +327,9 @@ public class MiscUtils {
     private static BaseComponent getNextButtonComponent() {
         TextComponent textComponent = new TextComponent("[Next >>]");
         textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new TextComponent[]{new TextComponent("Click to view the next page")}));
+              new TextComponent[]{new TextComponent("Click to view the next page")}));
         textComponent.setClickEvent(
-                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr pg n"));
+              new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pr pg n"));
         return textComponent;
     }
 

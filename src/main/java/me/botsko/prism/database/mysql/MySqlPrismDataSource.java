@@ -55,6 +55,7 @@ public class MySqlPrismDataSource extends SQLPrismDataSource {
 
     /**
      * The adds the new requirements to an old configuration file.
+     *
      * @param section a {@link ConfigurationSection}
      */
     public static void updateDefaultConfig(ConfigurationSection section) {
@@ -83,7 +84,7 @@ public class MySqlPrismDataSource extends SQLPrismDataSource {
             Set<String> keys = PropertyElf.getPropertyNames(HikariConfig.class);
             for (String k : keys) {
                 if ("jbdcUrl".equals(k) || "username".equals(k) || "password".equals(k)
-                || "dataSourceProperties".equals(k) || "healthCheckProperties".equals(k)) {
+                      || "dataSourceProperties".equals(k) || "healthCheckProperties".equals(k)) {
                     continue;
                 }
                 Object out = PropertyElf.getProperty(k, dbConfig);
@@ -113,8 +114,8 @@ public class MySqlPrismDataSource extends SQLPrismDataSource {
     public MySqlPrismDataSource createDataSource() {
         if (dbConfig.getJdbcUrl() == null) {
             final String dns = "jdbc:mysql://" + this.section.getString("hostname") + ":"
-                    + this.section.getString("port") + "/" + this.section.getString("databaseName")
-                    + "?useUnicode=true&characterEncoding=UTF-8&useSSL=false";
+                  + this.section.getString("port") + "/" + this.section.getString("databaseName")
+                  + "?useUnicode=true&characterEncoding=UTF-8&useSSL=false";
             dbConfig.setJdbcUrl(dns);
             dbConfig.setUsername(this.section.getString("username"));
             dbConfig.setPassword(this.section.getString("password"));

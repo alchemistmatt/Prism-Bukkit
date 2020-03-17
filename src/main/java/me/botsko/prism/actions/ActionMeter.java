@@ -36,6 +36,7 @@ public class ActionMeter {
 
     /**
      * Setup the meter to record.
+     *
      * @param registry metric registry
      */
     public static void setupActionMeter(MetricRegistry registry) {

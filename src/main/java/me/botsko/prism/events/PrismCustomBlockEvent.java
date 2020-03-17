@@ -32,6 +32,15 @@ public class PrismCustomBlockEvent extends Event {
     }
 
     /**
+     * Required by bukkit for proper event handling.
+     *
+     * @return
+     */
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
+    /**
      * @return
      */
     public String getPluginName() {
@@ -72,15 +81,6 @@ public class PrismCustomBlockEvent extends Event {
     @NotNull
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    /**
-     * Required by bukkit for proper event handling.
-     *
-     * @return
-     */
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

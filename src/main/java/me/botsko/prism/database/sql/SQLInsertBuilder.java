@@ -11,7 +11,11 @@ import me.botsko.prism.utils.BlockUtils;
 import me.botsko.prism.utils.IntPair;
 import org.bukkit.Location;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
@@ -20,9 +24,9 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("ALL")
 public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
+    final ArrayList<Handler> extraDataQueue = new ArrayList<>();
     private PreparedStatement batchStatement;
     private Connection batchConnection;
-    final ArrayList<Handler> extraDataQueue = new ArrayList<>();
 
     /**
      * @param dataSource
@@ -69,8 +73,8 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
                 if (serialData != null && !serialData.isEmpty()) {
 
                     try (
-                            PreparedStatement s2 = con.prepareStatement(
-                                    "INSERT INTO `" + prefix + "data_extra` (data_id, data) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                          PreparedStatement s2 = con.prepareStatement(
+                                "INSERT INTO `" + prefix + "data_extra` (data_id, data) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
                         s2.setLong(1, id);
                         s2.setString(2, serialData);
                         s2.executeUpdate();
@@ -111,10 +115,10 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
         int player_id = prismPlayer.getId();
 
         IntPair newIds = Prism.getItems().materialToIds(a.getMaterial(),
-                BlockUtils.dataString(a.getBlockData()));
+              BlockUtils.dataString(a.getBlockData()));
 
         IntPair oldIds = Prism.getItems().materialToIds(a.getOldMaterial(),
-                BlockUtils.dataString(a.getOldBlockData()));
+              BlockUtils.dataString(a.getOldBlockData()));
         Location l = a.getLoc();
         applytoInsert(batchStatement, a, action_id, player_id, world_id, newIds, oldIds, l);
         batchStatement.addBatch();
@@ -146,7 +150,7 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
                 // @todo should not happen
                 if (i >= extraDataQueue.size()) {
                     Prism.log("Skipping extra data for " + prefix + "data.id " + keys.getLong(1)
-                            + " because the queue doesn't have data for it.");
+                          + " because the queue doesn't have data for it.");
                     continue;
                 }
 
@@ -161,7 +165,7 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
                     }
                 } else {
                     Prism.debug("Skipping extra data for " + prefix + "data.id " + keys.getLong(1)
-                            + " because the queue doesn't have data for it.");
+                          + " because the queue doesn't have data for it.");
                 }
 
                 i++;
@@ -172,7 +176,7 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
 
             if (conn.isClosed()) {
                 Prism.log(
-                        "Prism database error. We have to bail in the middle of building extra data bulk insert query.");
+                      "Prism database error. We have to bail in the middle of building extra data bulk insert query.");
             } else {
                 conn.commit();
             }
@@ -200,7 +204,7 @@ public class SQLInsertBuilder extends QueryBuilder implements InsertQuery {
     private String getQuery() {
 
         String sql = "INSERT INTO " + prefix
-                + "data (epoch,action_id,player_id,world_id,block_id,block_subid,old_block_id,old_block_subid,x,y,z) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+              + "data (epoch,action_id,player_id,world_id,block_id,block_subid,old_block_id,old_block_subid,x,y,z) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         return sql;
     }
 }

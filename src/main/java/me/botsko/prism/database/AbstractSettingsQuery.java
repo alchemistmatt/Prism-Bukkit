@@ -8,9 +8,8 @@ import org.bukkit.entity.Player;
  */
 public abstract class AbstractSettingsQuery implements SettingsQuery {
     /**
-     *
      * @param player the Player
-     * @param key the setting to return
+     * @param key    the setting to return
      * @return String
      */
     public String getPlayerKey(Player player, String key) {

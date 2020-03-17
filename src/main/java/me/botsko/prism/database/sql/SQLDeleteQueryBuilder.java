@@ -22,7 +22,7 @@ public class SQLDeleteQueryBuilder extends SQLSelectQueryBuilder implements Dele
     @Override
     protected String select() {
         return "DELETE FROM " + tableNameData + " USING " + tableNameData + " LEFT JOIN " + tableNameDataExtra
-                + " ex ON (" + tableNameData + ".id = ex.data_id) ";
+              + " ex ON (" + tableNameData + ".id = ex.data_id) ";
     }
 
     /**
@@ -56,8 +56,8 @@ public class SQLDeleteQueryBuilder extends SQLSelectQueryBuilder implements Dele
         int total_rows_affected = 0;
         int cycle_rows_affected = 0;
         try (
-                Connection connection = dataSource.getDataSource().getConnection();
-                Statement s = connection.createStatement()
+              Connection connection = dataSource.getDataSource().getConnection();
+              Statement s = connection.createStatement()
         ) {
             cycle_rows_affected = s.executeUpdate(getQuery(parameters, shouldGroup));
             total_rows_affected += cycle_rows_affected;

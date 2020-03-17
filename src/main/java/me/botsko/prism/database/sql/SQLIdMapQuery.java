@@ -1,25 +1,22 @@
 package me.botsko.prism.database.sql;
 
+import me.botsko.prism.database.IdMapQuery;
+import me.botsko.prism.database.PrismDataSource;
+import me.botsko.prism.utils.IntPair;
+import org.apache.commons.lang.Validate;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.List;
-
-import me.botsko.prism.database.IdMapQuery;
-import me.botsko.prism.database.PrismDataSource;
-import org.apache.commons.lang.Validate;
-
-import me.botsko.prism.utils.IntPair;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class SQLIdMapQuery implements IdMapQuery {
-    private String prefix;
-    private PrismDataSource dataSource;
     private static final String toIds = "SELECT block_id, block_subid FROM <prefix>id_map WHERE material=? AND state=? LIMIT 1;";
     private static final String toAllIds = "SELECT block_id, block_subid FROM <prefix>id_map WHERE material=?;";
     private static final String partialToAllIds = "SELECT block_id, block_subid FROM <prefix>id_map WHERE material=? AND state LIKE ?";
@@ -28,6 +25,8 @@ public class SQLIdMapQuery implements IdMapQuery {
     private static final String automap = "INSERT INTO <prefix>id_map(material, state) VALUES (?, ?);";
     private static final String repair = "UPDATE <prefix>id_map SET block_id=?, block_subid=? WHERE block_id=?;";
     private static final String unauto = "ALTER TABLE <prefix>id_map AUTO_INCREMENT=?;";
+    private String prefix;
+    private PrismDataSource dataSource;
 
     public SQLIdMapQuery(PrismDataSource dataSource) {
         this.dataSource = dataSource;
@@ -248,17 +247,6 @@ public class SQLIdMapQuery implements IdMapQuery {
                     }
 
                     return autoInc;
-					
-					/*if(success) {
-						return autoInc;
-					}
-					else {
-						
-						try (PreparedStatement undoInc = conn.prepareStatement(unauto.replace("<prefix>", prefix))) {
-							st.setInt(1, autoInc - 1);
-							st.executeUpdate();
-						}
-					}*/
                 }
             }
         } catch (final SQLException e) {

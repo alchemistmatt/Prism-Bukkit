@@ -8,7 +8,10 @@ import me.botsko.prism.database.SelectProcessActionQuery;
 import me.botsko.prism.measurement.TimeTaken;
 import org.bukkit.Bukkit;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 /**
@@ -37,11 +40,11 @@ public class SQLSelectProcessQuery extends SQLSelectQueryBuilder implements Sele
     protected String select() {
         if (getLastID) {
             String sql = "SELECT id FROM " + prefix + "data JOIN " + prefix + "players p ON p.player_id = " + prefix
-                    + "data.player_id";
+                  + "data.player_id";
             return sql;
         }
         String sql = "SELECT id, action, epoch, world, player, player_uuid, x, y, z, data FROM " + prefix
-                + "data d";
+              + "data d";
         sql += " INNER JOIN " + prefix + "players p ON p.player_id = d.player_id ";
         sql += " INNER JOIN " + prefix + "actions a ON a.action_id = d.action_id ";
         sql += " INNER JOIN " + prefix + "worlds w ON w.world_id = d.world_id ";
@@ -94,9 +97,9 @@ public class SQLSelectProcessQuery extends SQLSelectQueryBuilder implements Sele
         final String query = getQuery(parameters, false);
         PrismProcessAction process = null;
         try (
-                Connection conn = dataSource.getDataSource().getConnection();
-                PreparedStatement s = conn.prepareStatement(query);
-                ResultSet rs = s.executeQuery()
+              Connection conn = dataSource.getDataSource().getConnection();
+              PreparedStatement s = conn.prepareStatement(query);
+              ResultSet rs = s.executeQuery()
         ) {
             if (rs.first()) {
                 process = new PrismProcessAction();
@@ -124,9 +127,9 @@ public class SQLSelectProcessQuery extends SQLSelectQueryBuilder implements Sele
             long id = 0;
             final String query = getQuery(parameters, false);
             try (
-                    Connection conn = dataSource.getDataSource().getConnection();
-                    PreparedStatement s = conn.prepareStatement(query);
-                    ResultSet rs = s.executeQuery()
+                  Connection conn = dataSource.getDataSource().getConnection();
+                  PreparedStatement s = conn.prepareStatement(query);
+                  ResultSet rs = s.executeQuery()
             ) {
                 if (rs.first()) {
                     id = rs.getLong("id");
